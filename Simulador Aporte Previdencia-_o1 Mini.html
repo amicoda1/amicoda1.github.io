@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Aporte Complementar para Previdência Privada</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #555;
+            position: relative;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        .tooltip {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background-color: #555;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            top: 20px;
+            right: 30px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .resultado {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e7f3fe;
+            border-left: 6px solid #2196F3;
+        }
+        .resultado h3 {
+            margin-top: 0;
+        }
+        .resultado p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Calculadora de Aporte Complementar</h2>
+        <form id="calcForm">
+            <label for="rendaAnterior">
+                Renda Tributável do Ano Anterior (R$):
+                <div class="tooltip">?
+                    <span class="tooltiptext">Obtenha esta informação através da Declaração Anual do Imposto de Renda.</span>
+                </div>
+            </label>
+            <input type="number" id="rendaAnterior" required>
+
+            <label for="percentualAumento">
+                Percentual de Aumento Estimado (%):
+                <div class="tooltip">?
+                    <span class="tooltiptext">Este valor geralmente é o percentual de reajuste de mérito recebido durante o ano atual.</span>
+                </div>
+            </label>
+            <input type="number" id="percentualAumento" step="0.1" required>
+
+            <label for="contribuicoesFeitas">
+                Contribuições Feitas ao Longo do Ano (R$):
+            </label>
+            <input type="number" id="contribuicoesFeitas" required>
+
+            <label for="contribuicoesEstimadas">
+                Contribuições Estimadas para os Meses Restantes (R$):
+                <div class="tooltip">?
+                    <span class="tooltiptext">Esta é uma estimativa das contribuições para os meses restantes do ano.</span>
+                </div>
+            </label>
+            <input type="number" id="contribuicoesEstimadas" required>
+
+            <button type="button" onclick="calcular()">Calcular</button>
+        </form>
+
+        <div id="resultado" class="resultado" style="display: none;">
+            <h3>Resultado:</h3>
+            <p id="resultadoA"></p>
+            <p id="resultadoC"></p>
+            <p id="resultadoD"></p>
+        </div>
+    </div>
+
+    <script>
+        function calcular() {
+            // Obter valores dos inputs
+            const rendaAnterior = parseFloat(document.getElementById('rendaAnterior').value);
+            const percentualAumento = parseFloat(document.getElementById('percentualAumento').value);
+            const contribuicoesFeitas = parseFloat(document.getElementById('contribuicoesFeitas').value);
+            const contribuicoesEstimadas = parseFloat(document.getElementById('contribuicoesEstimadas').value);
+
+            // Validação básica
+            if (isNaN(rendaAnterior) || isNaN(percentualAumento) || isNaN(contribuicoesFeitas) || isNaN(contribuicoesEstimadas)) {
+                alert('Por favor, insira todos os valores corretamente.');
+                return;
+            }
+
+            if (rendaAnterior < 0 || percentualAumento < 0 || contribuicoesFeitas < 0 || contribuicoesEstimadas < 0) {
+                alert('Por favor, insira valores positivos.');
+                return;
+            }
+
+            // Cálculos
+            // a. Expectativa renda tributável do ano
+            const expectativaRenda = rendaAnterior * (1 + (percentualAumento / 100));
+
+            // c. Contribuição máxima dedutível (12% da expectativa renda)
+            const contribuicaoMaxima = expectativaRenda * 0.12;
+
+            // Soma das contribuições feitas e estimadas
+            const totalContribuicoes = contribuicoesFeitas + contribuicoesEstimadas;
+
+            // d. Valor aporte voluntário calculado
+            const aporteComplementar = contribuicaoMaxima - totalContribuicoes;
+
+            // Formatar valores para moeda
+            const expectativaRendaFormatted = expectativaRenda.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const contribuicaoMaximaFormatted = contribuicaoMaxima.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const totalContribuicoesFormatted = totalContribuicoes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const aporteComplementarFormatted = aporteComplementar >= 0 
+                ? aporteComplementar.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+                : 'Já atingiu o limite dedutível.';
+
+            // Exibir resultados
+            document.getElementById('resultadoA').innerHTML = `<strong>Expectativa Renda Tributável do Ano:</strong> ${expectativaRendaFormatted}`;
+            document.getElementById('resultadoC').innerHTML = `<strong>Contribuição Máxima Dedutível (12%):</strong> ${contribuicaoMaximaFormatted}`;
+            document.getElementById('resultadoD').innerHTML = `<strong>Aporte Complementar Necessário:</strong> ${aporteComplementarFormatted}`;
+
+            document.getElementById('resultado').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
